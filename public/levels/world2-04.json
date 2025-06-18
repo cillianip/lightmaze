@@ -1,0 +1,33 @@
+{
+  "id": 9,
+  "name": "Corner Pocket",
+  "world": 2,
+  "difficulty": "intermediate",
+  "parMoves": 8,
+  "lightSource": {
+    "x": 10,
+    "y": 10,
+    "angle": 3.14159
+  },
+  "walls": [
+    { "x": 0, "y": 0, "width": 20, "height": 1 },
+    { "x": 0, "y": 14, "width": 20, "height": 1 },
+    { "x": 0, "y": 0, "width": 1, "height": 15 },
+    { "x": 19, "y": 0, "width": 1, "height": 15 },
+    { "x": 3, "y": 3, "width": 5, "height": 1 },
+    { "x": 12, "y": 3, "width": 5, "height": 1 },
+    { "x": 3, "y": 11, "width": 5, "height": 1 },
+    { "x": 12, "y": 11, "width": 5, "height": 1 }
+  ],
+  "crystals": [
+    { "x": 2, "y": 2 },
+    { "x": 17, "y": 2 },
+    { "x": 2, "y": 12 },
+    { "x": 17, "y": 12 }
+  ],
+  "mirrors": [
+    { "x": 10, "y": 7, "angle": 0 },
+    { "x": 5, "y": 7, "angle": 0.785398 },
+    { "x": 15, "y": 7, "angle": -0.785398 }
+  ]
+}

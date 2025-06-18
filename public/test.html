@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Ray Casting Test</title>
+    <style>
+        body { margin: 0; background: #000; }
+        canvas { border: 1px solid #333; display: block; margin: 20px auto; }
+    </style>
+</head>
+<body>
+    <canvas id="canvas" width="800" height="600"></canvas>
+    <script type="module">
+        import { Vector2, RayCaster, Renderer } from './js/engine.js';
+        import { LightSource, Mirror, Crystal, Wall } from './js/entities.js';
+        
+        const canvas = document.getElementById('canvas');
+        const renderer = new Renderer(canvas);
+        const rayCaster = new RayCaster();
+        
+        // Create test entities
+        const lightSource = new LightSource(2, 7, 0);
+        const mirror = new Mirror(10, 7, Math.PI / 4);
+        const crystal = new Crystal(17, 7);
+        const walls = [
+            new Wall(0, 0, 20, 1),
+            new Wall(0, 14, 20, 1),
+            new Wall(0, 0, 1, 15),
+            new Wall(19, 0, 1, 15)
+        ];
+        
+        const entities = [lightSource, mirror, crystal, ...walls];
+        
+        function render() {
+            renderer.clear();
+            renderer.drawGrid(40);
+            
+            // Draw entities
+            entities.forEach(entity => renderer.drawEntity(entity));
+            
+            // Cast rays
+            const rays = rayCaster.cast(lightSource, entities);
+            renderer.drawRays(rays);
+            
+            requestAnimationFrame(render);
+        }
+        
+        render();
+        
+        // Test mirror rotation
+        canvas.addEventListener('click', () => {
+            mirror.rotate();
+        });
+    </script>
+</body>
+</html>

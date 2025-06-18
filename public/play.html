@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Light Maze - Play</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="game-container">
+        <header id="game-header">
+            <h1>Light Maze</h1>
+            <div id="level-info">
+                <span id="level-name">Level 1 - First Light</span>
+                <span id="world-indicator">World 1</span>
+            </div>
+        </header>
+        
+        <main id="game-main">
+            <div id="canvas-container">
+                <canvas id="game-canvas" width="800" height="600"></canvas>
+            </div>
+            
+            <aside id="game-hud">
+                <div class="stat-group">
+                    <label>Moves</label>
+                    <span id="move-counter">0</span>
+                    <span class="par-indicator">Par: <span id="par-moves">3</span></span>
+                </div>
+                
+                <div class="stat-group">
+                    <label>Time</label>
+                    <span id="timer">0:00</span>
+                </div>
+                
+                <div class="button-group">
+                    <button id="reset-btn" class="game-btn">Reset</button>
+                    <button id="undo-btn" class="game-btn">Undo</button>
+                    <button id="next-btn" class="game-btn primary">Next Level</button>
+                </div>
+                
+                <div id="crystal-status" class="status-display">
+                    <h3>Crystals</h3>
+                    <div id="crystal-indicators"></div>
+                </div>
+            </aside>
+        </main>
+        
+        <div id="victory-modal" class="modal hidden">
+            <div class="modal-content">
+                <h2>Level Complete!</h2>
+                <div class="victory-stats">
+                    <p>Moves: <span id="final-moves">0</span></p>
+                    <p>Time: <span id="final-time">0:00</span></p>
+                </div>
+                <div class="button-group">
+                    <button id="replay-btn" class="game-btn">Replay</button>
+                    <button id="next-level-btn" class="game-btn primary">Next Level</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script type="module">
+        import { RayCaster, Renderer } from './js/engine.js';
+        import { LightSource, Mirror, Crystal, Wall } from './js/entities.js';
+        import { EntityManager } from './js/entityManager.js';
+        
+        // Game state
+        const canvas = document.getElementById('game-canvas');
+        const renderer = new Renderer(canvas);
+        const rayCaster = new RayCaster();
+        const entityManager = new EntityManager();
+        
+        let moveCount = 0;
+        let startTime = Date.now();
+        let isComplete = false;
+        let currentLevel = 1;
+        
+        // Test levels
+        const levels = [
+            {
+                name: "First Light",
+                parMoves: 1,
+                lightSource: { x: 2, y: 7, angle: 0 },
+                walls: [
+                    { x: 0, y: 0, width: 20, height: 1 },
+                    { x: 0, y: 14, width: 20, height: 1 },
+                    { x: 0, y: 0, width: 1, height: 15 },
+                    { x: 19, y: 0, width: 1, height: 15 }
+                ],
+                crystals: [{ x: 17, y: 7 }],
+                mirrors: [{ x: 10, y: 7, angle: Math.PI / 4 }]
+            },
+            {
+                name: "Double Reflection",
+                parMoves: 2,
+                lightSource: { x: 2, y: 2, angle: 0 },
+                walls: [
+                    { x: 0, y: 0, width: 20, height: 1 },
+                    { x: 0, y: 14, width: 20, height: 1 },
+                    { x: 0, y: 0, width: 1, height: 15 },
+                    { x: 19, y: 0, width: 1, height: 15 },
+                    { x: 10, y: 5, width: 5, height: 1 }
+                ],
+                crystals: [{ x: 17, y: 12 }],
+                mirrors: [
+                    { x: 8, y: 2, angle: -Math.PI / 4 },
+                    { x: 8, y: 10, angle: Math.PI / 4 }
+                ]
+            }
+        ];
+        
+        function loadLevel(levelData) {
+            entityManager.clear();
+            moveCount = 0;
+            startTime = Date.now();
+            isComplete = false;
+            
+            // Update UI
+            document.getElementById('level-name').textContent = `Level ${currentLevel} - ${levelData.name}`;
+            document.getElementById('par-moves').textContent = levelData.parMoves;
+            updateMoveCounter();
+            
+            // Create entities
+            const lightSource = new LightSource(levelData.lightSource.x, levelData.lightSource.y, levelData.lightSource.angle);
+            entityManager.add(lightSource);
+            
+            levelData.walls.forEach(wallData => {
+                const wall = new Wall(wallData.x, wallData.y, wallData.width || 1, wallData.height || 1);
+                entityManager.add(wall);
+            });
+            
+            levelData.crystals.forEach(crystalData => {
+                const crystal = new Crystal(crystalData.x, crystalData.y);
+                entityManager.add(crystal);
+            });
+            
+            levelData.mirrors.forEach(mirrorData => {
+                const mirror = new Mirror(mirrorData.x, mirrorData.y, mirrorData.angle || Math.PI / 4);
+                entityManager.add(mirror);
+            });
+            
+            updateCrystalIndicators();
+        }
+        
+        function updateMoveCounter() {
+            document.getElementById('move-counter').textContent = moveCount;
+        }
+        
+        function updateTimer() {
+            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            const minutes = Math.floor(elapsed / 60);
+            const seconds = elapsed % 60;
+            document.getElementById('timer').textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        }
+        
+        function updateCrystalIndicators() {
+            const container = document.getElementById('crystal-indicators');
+            container.innerHTML = '';
+            
+            entityManager.getAllCrystals().forEach((crystal, index) => {
+                const indicator = document.createElement('div');
+                indicator.className = `crystal-indicator ${crystal.isActive ? 'active' : ''}`;
+                container.appendChild(indicator);
+            });
+        }
+        
+        function checkWinCondition() {
+            if (entityManager.checkWinCondition() && !isComplete) {
+                isComplete = true;
+                showVictory();
+            }
+        }
+        
+        function showVictory() {
+            document.getElementById('final-moves').textContent = moveCount;
+            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            const minutes = Math.floor(elapsed / 60);
+            const seconds = elapsed % 60;
+            document.getElementById('final-time').textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            document.getElementById('victory-modal').classList.remove('hidden');
+        }
+        
+        // Input handling
+        let draggedMirror = null;
+        
+        canvas.addEventListener('mousedown', (e) => {
+            if (isComplete) return;
+            
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            const mirror = entityManager.getMirrorAt(x, y);
+            if (mirror) {
+                mirror.startDrag(x, y);
+                draggedMirror = mirror;
+            }
+        });
+        
+        canvas.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            if (draggedMirror && draggedMirror.isDragging) {
+                draggedMirror.updateDrag(x, y);
+                entityManager.updateGridPosition(draggedMirror);
+            }
+            
+            // Update cursor
+            const mirror = entityManager.getMirrorAt(x, y);
+            canvas.style.cursor = mirror ? 'pointer' : 'crosshair';
+        });
+        
+        canvas.addEventListener('mouseup', () => {
+            if (draggedMirror && draggedMirror.isDragging) {
+                draggedMirror.endDrag();
+                moveCount++;
+                updateMoveCounter();
+            }
+            draggedMirror = null;
+        });
+        
+        canvas.addEventListener('click', (e) => {
+            if (isComplete || draggedMirror) return;
+            
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            const mirror = entityManager.getMirrorAt(x, y);
+            if (mirror) {
+                mirror.rotate();
+                moveCount++;
+                updateMoveCounter();
+            }
+        });
+        
+        canvas.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+        });
+        
+        // Button handlers
+        document.getElementById('reset-btn').addEventListener('click', () => {
+            loadLevel(levels[currentLevel - 1]);
+        });
+        
+        document.getElementById('undo-btn').addEventListener('click', () => {
+            // Simple undo: just reset for now
+            if (moveCount > 0) {
+                loadLevel(levels[currentLevel - 1]);
+            }
+        });
+        
+        document.getElementById('next-btn').addEventListener('click', () => {
+            if (currentLevel < levels.length) {
+                currentLevel++;
+                loadLevel(levels[currentLevel - 1]);
+            }
+        });
+        
+        document.getElementById('replay-btn').addEventListener('click', () => {
+            document.getElementById('victory-modal').classList.add('hidden');
+            loadLevel(levels[currentLevel - 1]);
+        });
+        
+        document.getElementById('next-level-btn').addEventListener('click', () => {
+            document.getElementById('victory-modal').classList.add('hidden');
+            if (currentLevel < levels.length) {
+                currentLevel++;
+                loadLevel(levels[currentLevel - 1]);
+            }
+        });
+        
+        // Game loop
+        function gameLoop() {
+            // Update
+            entityManager.resetCrystals();
+            
+            if (entityManager.lightSource) {
+                const rays = rayCaster.cast(entityManager.lightSource, entityManager.getAllEntities());
+                
+                // Render
+                renderer.clear();
+                renderer.drawGrid(40);
+                
+                entityManager.getAllEntities().forEach(entity => {
+                    renderer.drawEntity(entity);
+                });
+                
+                renderer.drawRays(rays);
+            }
+            
+            updateCrystalIndicators();
+            checkWinCondition();
+            
+            if (!isComplete) {
+                updateTimer();
+            }
+            
+            requestAnimationFrame(gameLoop);
+        }
+        
+        // Start game
+        loadLevel(levels[0]);
+        gameLoop();
+    </script>
+</body>
+</html>

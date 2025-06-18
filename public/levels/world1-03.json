@@ -1,0 +1,26 @@
+{
+  "id": 3,
+  "name": "Two Crystals",
+  "world": 1,
+  "difficulty": "tutorial",
+  "parMoves": 3,
+  "lightSource": {
+    "x": 2,
+    "y": 7,
+    "angle": 0
+  },
+  "walls": [
+    { "x": 0, "y": 0, "width": 20, "height": 1 },
+    { "x": 0, "y": 14, "width": 20, "height": 1 },
+    { "x": 0, "y": 0, "width": 1, "height": 15 },
+    { "x": 19, "y": 0, "width": 1, "height": 15 }
+  ],
+  "crystals": [
+    { "x": 10, "y": 3 },
+    { "x": 10, "y": 11 }
+  ],
+  "mirrors": [
+    { "x": 10, "y": 7, "angle": 0.785398 }
+  ],
+  "hint": "Light passes through crystals. Hit both to win!"
+}

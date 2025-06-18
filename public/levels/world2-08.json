@@ -1,0 +1,35 @@
+{
+  "id": 13,
+  "name": "Diamond Mine",
+  "world": 2,
+  "difficulty": "intermediate",
+  "parMoves": 8,
+  "lightSource": {
+    "x": 10,
+    "y": 1,
+    "angle": 1.5708
+  },
+  "walls": [
+    { "x": 0, "y": 0, "width": 20, "height": 1 },
+    { "x": 0, "y": 14, "width": 20, "height": 1 },
+    { "x": 0, "y": 0, "width": 1, "height": 15 },
+    { "x": 19, "y": 0, "width": 1, "height": 15 },
+    { "x": 7, "y": 5, "width": 1, "height": 1 },
+    { "x": 12, "y": 5, "width": 1, "height": 1 },
+    { "x": 7, "y": 9, "width": 1, "height": 1 },
+    { "x": 12, "y": 9, "width": 1, "height": 1 }
+  ],
+  "crystals": [
+    { "x": 5, "y": 7 },
+    { "x": 10, "y": 5 },
+    { "x": 14, "y": 7 },
+    { "x": 10, "y": 9 }
+  ],
+  "mirrors": [
+    { "x": 10, "y": 7, "angle": 0.785398 },
+    { "x": 8, "y": 6, "angle": -0.785398 },
+    { "x": 12, "y": 6, "angle": 0.785398 },
+    { "x": 8, "y": 8, "angle": 0.785398 },
+    { "x": 12, "y": 8, "angle": -0.785398 }
+  ]
+}

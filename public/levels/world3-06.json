@@ -1,0 +1,38 @@
+{
+  "id": 20,
+  "name": "Quantum Leap",
+  "world": 3,
+  "difficulty": "advanced",
+  "parMoves": 18,
+  "lightSource": {
+    "x": 10,
+    "y": 1,
+    "angle": 1.5708
+  },
+  "walls": [
+    { "x": 0, "y": 0, "width": 20, "height": 1 },
+    { "x": 0, "y": 14, "width": 20, "height": 1 },
+    { "x": 0, "y": 0, "width": 1, "height": 15 },
+    { "x": 19, "y": 0, "width": 1, "height": 15 },
+    { "x": 4, "y": 4, "width": 3, "height": 3 },
+    { "x": 13, "y": 4, "width": 3, "height": 3 },
+    { "x": 4, "y": 8, "width": 3, "height": 3 },
+    { "x": 13, "y": 8, "width": 3, "height": 3 }
+  ],
+  "crystals": [
+    { "x": 2, "y": 7 },
+    { "x": 10, "y": 2 },
+    { "x": 17, "y": 7 },
+    { "x": 10, "y": 12 }
+  ],
+  "mirrors": [
+    { "x": 10, "y": 5, "angle": 0.785398 },
+    { "x": 8, "y": 3, "angle": -0.785398 },
+    { "x": 12, "y": 3, "angle": 0.785398 },
+    { "x": 8, "y": 7, "angle": 0.785398 },
+    { "x": 12, "y": 7, "angle": -0.785398 },
+    { "x": 8, "y": 11, "angle": 0.785398 },
+    { "x": 12, "y": 11, "angle": -0.785398 },
+    { "x": 10, "y": 9, "angle": -0.785398 }
+  ]
+}

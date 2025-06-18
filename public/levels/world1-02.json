@@ -1,0 +1,25 @@
+{
+  "id": 2,
+  "name": "Mirror Movement",
+  "world": 1,
+  "difficulty": "tutorial",
+  "parMoves": 2,
+  "lightSource": {
+    "x": 2,
+    "y": 2,
+    "angle": 0
+  },
+  "walls": [
+    { "x": 0, "y": 0, "width": 20, "height": 1 },
+    { "x": 0, "y": 14, "width": 20, "height": 1 },
+    { "x": 0, "y": 0, "width": 1, "height": 15 },
+    { "x": 19, "y": 0, "width": 1, "height": 15 }
+  ],
+  "crystals": [
+    { "x": 17, "y": 12 }
+  ],
+  "mirrors": [
+    { "x": 5, "y": 5, "angle": -0.785398 }
+  ],
+  "hint": "Drag the mirror to move it, then rotate to hit the crystal."
+}

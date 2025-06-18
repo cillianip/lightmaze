@@ -1,0 +1,27 @@
+{
+  "id": 4,
+  "name": "Wall Bounce",
+  "world": 1,
+  "difficulty": "tutorial",
+  "parMoves": 2,
+  "lightSource": {
+    "x": 2,
+    "y": 7,
+    "angle": 0
+  },
+  "walls": [
+    { "x": 0, "y": 0, "width": 20, "height": 1 },
+    { "x": 0, "y": 14, "width": 20, "height": 1 },
+    { "x": 0, "y": 0, "width": 1, "height": 15 },
+    { "x": 19, "y": 0, "width": 1, "height": 15 },
+    { "x": 10, "y": 5, "width": 1, "height": 5 }
+  ],
+  "crystals": [
+    { "x": 17, "y": 7 }
+  ],
+  "mirrors": [
+    { "x": 8, "y": 7, "angle": -0.785398 },
+    { "x": 8, "y": 3, "angle": 0.785398 }
+  ],
+  "hint": "Use walls to block the light path and plan your reflections."
+}

@@ -1,0 +1,28 @@
+{
+  "id": 7,
+  "name": "Crystal Garden",
+  "world": 2,
+  "difficulty": "intermediate",
+  "parMoves": 6,
+  "lightSource": {
+    "x": 10,
+    "y": 7,
+    "angle": 0
+  },
+  "walls": [
+    { "x": 0, "y": 0, "width": 20, "height": 1 },
+    { "x": 0, "y": 14, "width": 20, "height": 1 },
+    { "x": 0, "y": 0, "width": 1, "height": 15 },
+    { "x": 19, "y": 0, "width": 1, "height": 15 }
+  ],
+  "crystals": [
+    { "x": 17, "y": 3 },
+    { "x": 17, "y": 7 },
+    { "x": 17, "y": 11 }
+  ],
+  "mirrors": [
+    { "x": 14, "y": 7, "angle": 0 },
+    { "x": 14, "y": 3, "angle": 0.785398 },
+    { "x": 14, "y": 11, "angle": -0.785398 }
+  ]
+}
