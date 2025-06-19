@@ -100,15 +100,19 @@ export class LevelSelector {
   }
   
   getLevelProgress(levelId) {
-    const key = `level_${levelId}`;
-    const saved = localStorage.getItem(key);
-    
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch (e) {
-        return { completed: false };
+    try {
+      const key = `level_${levelId}`;
+      const saved = localStorage.getItem(key);
+      
+      if (saved) {
+        try {
+          return JSON.parse(saved);
+        } catch (e) {
+          return { completed: false };
+        }
       }
+    } catch (error) {
+      console.warn('Unable to load level progress:', error);
     }
     
     return { completed: false };

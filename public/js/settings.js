@@ -15,29 +15,38 @@ export class Settings {
   }
   
   loadSettings() {
-    const saved = localStorage.getItem('lightMazeSettings');
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        this.settings = { ...this.settings, ...parsed };
-        
-        if (this.settings.colorblindMode) {
-          document.body.classList.add('colorblind-mode');
+    try {
+      const saved = localStorage.getItem('lightMazeSettings');
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          this.settings = { ...this.settings, ...parsed };
+          
+          if (this.settings.colorblindMode) {
+            document.body.classList.add('colorblind-mode');
+          }
+          
+          if (this.settings.highContrast) {
+            document.body.classList.add('high-contrast');
+          }
+          
+          this.updateUI();
+        } catch (error) {
+          console.error('Failed to parse settings:', error);
         }
-        
-        if (this.settings.highContrast) {
-          document.body.classList.add('high-contrast');
-        }
-        
-        this.updateUI();
-      } catch (error) {
-        console.error('Failed to load settings:', error);
       }
+    } catch (error) {
+      console.warn('LocalStorage not available:', error);
+      // Settings will use defaults
     }
   }
   
   saveSettings() {
-    localStorage.setItem('lightMazeSettings', JSON.stringify(this.settings));
+    try {
+      localStorage.setItem('lightMazeSettings', JSON.stringify(this.settings));
+    } catch (error) {
+      console.warn('Unable to save settings:', error);
+    }
   }
   
   updateUI() {
@@ -98,29 +107,37 @@ export class Settings {
   }
   
   getBestTime(levelId) {
-    const key = `level_${levelId}`;
-    const data = localStorage.getItem(key);
-    if (data) {
-      try {
-        const parsed = JSON.parse(data);
-        return parsed.bestTime;
-      } catch (error) {
-        return null;
+    try {
+      const key = `level_${levelId}`;
+      const data = localStorage.getItem(key);
+      if (data) {
+        try {
+          const parsed = JSON.parse(data);
+          return parsed.bestTime;
+        } catch (error) {
+          return null;
+        }
       }
+    } catch (error) {
+      console.warn('Unable to get best time:', error);
     }
     return null;
   }
   
   getBestMoves(levelId) {
-    const key = `level_${levelId}`;
-    const data = localStorage.getItem(key);
-    if (data) {
-      try {
-        const parsed = JSON.parse(data);
-        return parsed.bestMoves;
-      } catch (error) {
-        return null;
+    try {
+      const key = `level_${levelId}`;
+      const data = localStorage.getItem(key);
+      if (data) {
+        try {
+          const parsed = JSON.parse(data);
+          return parsed.bestMoves;
+        } catch (error) {
+          return null;
+        }
       }
+    } catch (error) {
+      console.warn('Unable to get best moves:', error);
     }
     return null;
   }

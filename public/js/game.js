@@ -287,11 +287,13 @@ export class Game {
         window.LightMaze.ui.showVictory(this.moveCount, this.getElapsedTime());
       }
       
-      this.levelManager.completeLevel(
-        this.currentLevel.id,
-        this.moveCount,
-        this.getElapsedTime()
-      );
+      if (this.currentLevel && this.currentLevel.id) {
+        this.levelManager.completeLevel(
+          this.currentLevel.id,
+          this.moveCount,
+          this.getElapsedTime()
+        );
+      }
     }
   }
   

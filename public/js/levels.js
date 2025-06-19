@@ -11,19 +11,27 @@ export class LevelManager {
   
   async loadLevels() {
     const levelPromises = [];
+    const worldLevels = {
+      1: 5,   // Tutorial world
+      2: 9,   // Intermediate world  
+      3: 11   // Advanced world
+    };
+    
+    let globalId = 1;
     
     for (let world = 1; world <= 3; world++) {
-      for (let level = 1; level <= 9; level++) {
-        const id = (world - 1) * 9 + level;
-        if (id > 25) break;
-        
+      const levelsInWorld = worldLevels[world];
+      
+      for (let level = 1; level <= levelsInWorld; level++) {
         const levelNum = level.toString().padStart(2, '0');
         const filename = `world${world}-${levelNum}.json`;
         
         levelPromises.push(
-          this.loadLevel(filename, id, world)
-            .catch(() => this.generatePlaceholderLevel(id, world))
+          this.loadLevel(filename, globalId, world)
+            .catch(() => this.generatePlaceholderLevel(globalId, world))
         );
+        
+        globalId++;
       }
     }
     
@@ -153,17 +161,21 @@ export class LevelManager {
   completeLevel(id, moves, time) {
     this.unlockLevel(id + 1);
     
-    const key = `level_${id}`;
-    const existing = JSON.parse(localStorage.getItem(key) || '{}');
-    
-    const newRecord = {
-      completed: true,
-      bestMoves: Math.min(moves, existing.bestMoves || Infinity),
-      bestTime: Math.min(time, existing.bestTime || Infinity),
-      lastPlayed: Date.now()
-    };
-    
-    localStorage.setItem(key, JSON.stringify(newRecord));
+    try {
+      const key = `level_${id}`;
+      const existing = JSON.parse(localStorage.getItem(key) || '{}');
+      
+      const newRecord = {
+        completed: true,
+        bestMoves: Math.min(moves, existing.bestMoves || Infinity),
+        bestTime: Math.min(time, existing.bestTime || Infinity),
+        lastPlayed: Date.now()
+      };
+      
+      localStorage.setItem(key, JSON.stringify(newRecord));
+    } catch (error) {
+      console.warn('Unable to save level progress:', error);
+    }
     
     if (window.analytics && window.analytics.track) {
       window.analytics.track('level_complete', {
@@ -175,18 +187,26 @@ export class LevelManager {
   }
   
   loadProgress() {
-    const saved = localStorage.getItem('unlockedLevels');
-    if (saved) {
-      try {
-        const unlocked = JSON.parse(saved);
-        this.unlockedLevels = new Set(unlocked);
-      } catch (e) {
-        console.error('Failed to load progress:', e);
+    try {
+      const saved = localStorage.getItem('unlockedLevels');
+      if (saved) {
+        try {
+          const unlocked = JSON.parse(saved);
+          this.unlockedLevels = new Set(unlocked);
+        } catch (e) {
+          console.error('Failed to parse progress:', e);
+        }
       }
+    } catch (error) {
+      console.warn('LocalStorage not available:', error);
     }
   }
   
   saveProgress() {
-    localStorage.setItem('unlockedLevels', JSON.stringify([...this.unlockedLevels]));
+    try {
+      localStorage.setItem('unlockedLevels', JSON.stringify([...this.unlockedLevels]));
+    } catch (error) {
+      console.warn('Unable to save progress:', error);
+    }
   }
 }
