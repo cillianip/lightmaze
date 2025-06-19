@@ -45,6 +45,11 @@ const LightMaze = {
       const lastLevel = this.settings.getLastPlayedLevel() || 1;
       this.loadLevel(lastLevel);
       
+      // Start background music if enabled
+      if (this.settings.isMusicEnabled()) {
+        this.audioManager.playMusic();
+      }
+      
       // Export for debugging
       window.Game = this.game;
       
@@ -83,6 +88,11 @@ const LightMaze = {
       this.game.pause();
     });
     
+    // Settings button
+    document.getElementById('settings-btn').addEventListener('click', () => {
+      this.ui.showSettings();
+    });
+    
     // Victory modal buttons
     document.getElementById('replay-btn').addEventListener('click', () => {
       this.game.resetLevel();
@@ -119,6 +129,31 @@ const LightMaze = {
         this.game.resume();
       }
     });
+    
+    // Keyboard shortcuts for audio controls
+    document.addEventListener('keydown', (e) => {
+      // M - toggle music
+      if (e.key === 'm' || e.key === 'M') {
+        const musicEnabled = !this.settings.isMusicEnabled();
+        this.settings.setMusicEnabled(musicEnabled);
+        const musicToggle = document.getElementById('music-toggle');
+        if (musicToggle) musicToggle.checked = musicEnabled;
+        
+        if (musicEnabled) {
+          this.audioManager.playMusic();
+        } else {
+          this.audioManager.stopMusic();
+        }
+      }
+      
+      // S - toggle sound effects
+      if (e.key === 's' || e.key === 'S') {
+        const soundEnabled = !this.settings.isSoundEnabled();
+        this.settings.setSoundEnabled(soundEnabled);
+        const soundToggle = document.getElementById('sound-toggle');
+        if (soundToggle) soundToggle.checked = soundEnabled;
+      }
+    });
   },
   
   hideLoadingScreen() {
@@ -138,6 +173,7 @@ const LightMaze = {
 
 // Initialize game when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
+  window.LightMaze = LightMaze;
   LightMaze.init();
 });
 
