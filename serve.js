@@ -20,7 +20,15 @@ const MIME_TYPES = {
 const server = createServer(async (req, res) => {
   try {
     const safePath = req.url.split('?')[0].replace(/\.\./g, '');
-    let filePath = join(__dirname, 'public', safePath === '/' ? 'game.html' : safePath);
+    let filePath;
+    
+    if (safePath === '/') {
+      filePath = join(__dirname, 'public', 'game.html');
+    } else if (safePath === '/editor') {
+      filePath = join(__dirname, 'public', 'editor.html');
+    } else {
+      filePath = join(__dirname, 'public', safePath);
+    }
     
     const ext = extname(filePath);
     const contentType = MIME_TYPES[ext] || 'text/plain';
