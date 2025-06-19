@@ -1,8 +1,11 @@
 'use strict';
 
-import { RayCaster, Renderer } from './engine.js';
+import { RayCaster, Renderer, Vector2 } from './engine.js';
 import { LightSource, Mirror, Crystal, Wall } from './entities.js';
 import { EntityManager } from './entityManager.js';
+import { ParticleSystem } from './particles.js';
+import { TransitionManager } from './transitions.js';
+import { PerformanceMonitor } from './performance.js';
 
 export class Game {
   constructor(canvas, levelManager, audioManager) {
@@ -13,6 +16,9 @@ export class Game {
     this.renderer = new Renderer(canvas);
     this.rayCaster = new RayCaster();
     this.entityManager = new EntityManager();
+    this.particleSystem = new ParticleSystem();
+    this.transitionManager = new TransitionManager(canvas);
+    this.performanceMonitor = new PerformanceMonitor();
     
     this.moveCount = 0;
     this.startTime = Date.now();
@@ -23,15 +29,29 @@ export class Game {
     this.currentLevel = null;
     this.draggedMirror = null;
     this.hoveredMirror = null;
+    this.lastTimestamp = null;
     
     this.setupInputHandlers();
     this.gameLoop = this.gameLoop.bind(this);
     requestAnimationFrame(this.gameLoop);
   }
   
-  loadLevel(levelData) {
+  loadLevel(levelData, useTransition = true) {
+    if (useTransition && !this.transitionManager.isActive()) {
+      // Start transition
+      const transitionType = ['circleWipe', 'slideLeft', 'slideRight'][Math.floor(Math.random() * 3)];
+      this.transitionManager[transitionType](() => {
+        this._loadLevelData(levelData);
+      }, 600);
+    } else {
+      this._loadLevelData(levelData);
+    }
+  }
+  
+  _loadLevelData(levelData) {
     this.currentLevel = levelData;
     this.entityManager.clear();
+    this.particleSystem.clear();
     this.history = [];
     this.moveCount = 0;
     this.startTime = Date.now();
@@ -174,6 +194,10 @@ export class Game {
       this.moveCount++;
       this.updateUI();
       this.audioManager.play('rotate');
+      
+      // Create rotation particle effect
+      const pos = mirror.getCenter();
+      this.particleSystem.createMirrorRotation(pos.x, pos.y);
     }
   }
   
@@ -232,7 +256,7 @@ export class Game {
   
   resetLevel() {
     if (this.currentLevel) {
-      this.loadLevel(this.currentLevel);
+      this.loadLevel(this.currentLevel, false); // No transition for reset
       this.audioManager.play('reset');
     }
   }
@@ -254,7 +278,10 @@ export class Game {
     
     if (allCrystalsActive && !this.isComplete) {
       this.isComplete = true;
-      this.audioManager.play('victory');
+      this.audioManager.play('levelComplete');
+      
+      // Create victory particle effect
+      this.particleSystem.createVictoryEffect(this.canvas.width, this.canvas.height);
       
       if (window.LightMaze && window.LightMaze.ui) {
         window.LightMaze.ui.showVictory(this.moveCount, this.getElapsedTime());
@@ -268,22 +295,80 @@ export class Game {
     }
   }
   
-  gameLoop() {
-    if (!this.isPaused) {
-      this.update();
-      this.render();
+  gameLoop(timestamp) {
+    this.performanceMonitor.startFrame();
+    
+    if (!this.lastTimestamp) {
+      this.lastTimestamp = timestamp;
     }
     
+    const deltaTime = Math.min((timestamp - this.lastTimestamp) / 1000, 0.016); // Cap at 60fps
+    this.lastTimestamp = timestamp;
+    
+    if (!this.isPaused) {
+      this.performanceMonitor.startProfile('update');
+      this.update(deltaTime);
+      this.performanceMonitor.endProfile('update');
+      
+      this.performanceMonitor.startProfile('render');
+      this.render();
+      this.performanceMonitor.endProfile('render');
+    }
+    
+    // Update and render transitions
+    this.transitionManager.update(timestamp);
+    this.transitionManager.render();
+    
+    this.performanceMonitor.endFrame();
     requestAnimationFrame(this.gameLoop);
   }
   
-  update() {
+  update(deltaTime) {
+    // Store previous crystal states
+    const previousCrystalStates = new Map();
+    this.entityManager.crystals.forEach(crystal => {
+      previousCrystalStates.set(crystal.id, crystal.isActive);
+    });
+    
     this.entityManager.resetCrystals();
     
     if (this.entityManager.lightSource) {
       const rays = this.rayCaster.cast(this.entityManager.lightSource, this.entityManager.getAllEntities());
       this.currentRays = rays;
+      
+      // Add beam trail particles
+      if (rays.length > 0 && Math.random() < 0.3) { // 30% chance per frame
+        const ray = rays[rays.length - 1];
+        if (ray.points.length > 1) {
+          const lastPoint = ray.points[ray.points.length - 1];
+          const secondLastPoint = ray.points[ray.points.length - 2];
+          const direction = {
+            x: lastPoint.x - secondLastPoint.x,
+            y: lastPoint.y - secondLastPoint.y
+          };
+          const length = Math.sqrt(direction.x * direction.x + direction.y * direction.y);
+          if (length > 0) {
+            direction.x /= length;
+            direction.y /= length;
+            this.particleSystem.createBeamTrail(lastPoint.x, lastPoint.y, 
+              new Vector2(direction.x, direction.y));
+          }
+        }
+      }
     }
+    
+    // Check for newly activated crystals
+    this.entityManager.crystals.forEach(crystal => {
+      if (crystal.isActive && !previousCrystalStates.get(crystal.id)) {
+        // Crystal just activated!
+        const pos = crystal.getCenter();
+        this.particleSystem.createCrystalActivation(pos.x, pos.y);
+        this.audioManager.play('crystal');
+      }
+    });
+    
+    // Update particle system
+    this.particleSystem.update(deltaTime);
     
     this.checkWinCondition();
   }
@@ -299,6 +384,9 @@ export class Game {
     if (this.currentRays) {
       this.renderer.drawRays(this.currentRays);
     }
+    
+    // Render particles on top
+    this.particleSystem.render(this.renderer.ctx);
   }
   
   pause() {

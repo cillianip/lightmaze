@@ -30,6 +30,11 @@ const LightMaze = {
       
       this.game.loadLevel(this.levelManager.getCurrentLevel());
       
+      // Start background music if enabled
+      if (this.settings.isMusicEnabled()) {
+        this.audioManager.playMusic();
+      }
+      
       window.Game = this.game;
       
     } catch (error) {
@@ -76,6 +81,29 @@ const LightMaze = {
         this.game.resume();
       }
     });
+    
+    // Keyboard shortcuts for audio controls
+    document.addEventListener('keydown', (e) => {
+      // M - toggle music
+      if (e.key === 'm' || e.key === 'M') {
+        const musicEnabled = !this.settings.isMusicEnabled();
+        this.settings.setMusicEnabled(musicEnabled);
+        document.getElementById('music-toggle').checked = musicEnabled;
+        
+        if (musicEnabled) {
+          this.audioManager.playMusic();
+        } else {
+          this.audioManager.stopMusic();
+        }
+      }
+      
+      // S - toggle sound effects
+      if (e.key === 's' || e.key === 'S') {
+        const soundEnabled = !this.settings.isSoundEnabled();
+        this.settings.setSoundEnabled(soundEnabled);
+        document.getElementById('sound-toggle').checked = soundEnabled;
+      }
+    });
   },
   
   hideLoadingScreen() {
@@ -94,6 +122,7 @@ const LightMaze = {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
+  window.LightMaze = LightMaze;
   LightMaze.init();
 });
 

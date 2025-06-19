@@ -171,25 +171,47 @@ export class Renderer {
     rays.forEach(ray => {
       if (ray.points.length < 2) return;
       
-      this.ctx.shadowBlur = 20;
-      this.ctx.shadowColor = '#00ffff';
-      this.ctx.strokeStyle = '#00ffff';
-      this.ctx.lineWidth = 3;
-      this.ctx.lineCap = 'round';
+      // Draw multiple layers for smooth glow effect
+      const layers = [
+        { width: 8, color: 'rgba(0, 255, 255, 0.2)', blur: 20 },
+        { width: 5, color: 'rgba(0, 255, 255, 0.4)', blur: 15 },
+        { width: 3, color: '#00ffff', blur: 10 },
+        { width: 1, color: 'rgba(255, 255, 255, 0.8)', blur: 0 }
+      ];
       
-      this.ctx.beginPath();
-      this.ctx.moveTo(ray.points[0].x, ray.points[0].y);
+      layers.forEach(layer => {
+        this.ctx.save();
+        this.ctx.strokeStyle = layer.color;
+        this.ctx.lineWidth = layer.width;
+        this.ctx.shadowColor = '#00ffff';
+        this.ctx.shadowBlur = layer.blur;
+        this.ctx.lineCap = 'round';
+        this.ctx.lineJoin = 'round';
+        
+        this.ctx.beginPath();
+        this.ctx.moveTo(ray.points[0].x, ray.points[0].y);
+        
+        for (let i = 1; i < ray.points.length; i++) {
+          this.ctx.lineTo(ray.points[i].x, ray.points[i].y);
+        }
+        
+        this.ctx.stroke();
+        this.ctx.restore();
+      });
       
-      for (let i = 1; i < ray.points.length; i++) {
-        this.ctx.lineTo(ray.points[i].x, ray.points[i].y);
-      }
-      
-      this.ctx.stroke();
-      
-      this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
-      this.ctx.lineWidth = 1;
-      this.ctx.shadowBlur = 0;
-      this.ctx.stroke();
+      // Draw glowing points at reflection points
+      ray.points.forEach((point, i) => {
+        if (i > 0 && i < ray.points.length - 1) {
+          this.ctx.save();
+          this.ctx.fillStyle = '#00ffff';
+          this.ctx.shadowColor = '#00ffff';
+          this.ctx.shadowBlur = 15;
+          this.ctx.beginPath();
+          this.ctx.arc(point.x, point.y, 3, 0, Math.PI * 2);
+          this.ctx.fill();
+          this.ctx.restore();
+        }
+      });
     });
   }
   

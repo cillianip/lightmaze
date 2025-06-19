@@ -37,6 +37,14 @@ export class UI {
     
     document.getElementById('music-toggle').addEventListener('change', (e) => {
       this.settings.setMusicEnabled(e.target.checked);
+      
+      if (window.LightMaze && window.LightMaze.audioManager) {
+        if (e.target.checked) {
+          window.LightMaze.audioManager.playMusic();
+        } else {
+          window.LightMaze.audioManager.stopMusic();
+        }
+      }
     });
     
     document.getElementById('colorblind-toggle').addEventListener('change', (e) => {
