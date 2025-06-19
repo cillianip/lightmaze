@@ -22,5 +22,5 @@
   "mirrors": [
     { "x": 10, "y": 7, "angle": 0.785398 }
   ],
-  "hint": "Light passes through crystals. Hit both to win!"
+  "hint": "Light passes through crystals without stopping. Position the mirror so the beam hits both crystals!"
 }

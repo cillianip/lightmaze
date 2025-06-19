@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Crystal Pass-Through Test</title>
+    <style>
+        body {
+            margin: 0;
+            background: #111;
+            color: white;
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        canvas {
+            border: 1px solid #333;
+            display: block;
+            margin: 20px 0;
+        }
+        .info {
+            margin: 10px 0;
+        }
+        .crystal-status {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #ff00ff;
+            margin: 0 5px;
+            vertical-align: middle;
+        }
+        .crystal-status.active {
+            background: #00ff00;
+            border-color: #00ff00;
+            box-shadow: 0 0 10px #00ff00;
+        }
+    </style>
+</head>
+<body>
+    <h1>Crystal Pass-Through Test</h1>
+    <p>The light beam should pass through crystals and activate all of them.</p>
+    
+    <canvas id="test-canvas" width="800" height="300"></canvas>
+    
+    <div class="info">
+        Crystal 1: <span class="crystal-status" id="crystal-1"></span>
+        Crystal 2: <span class="crystal-status" id="crystal-2"></span>
+        Crystal 3: <span class="crystal-status" id="crystal-3"></span>
+    </div>
+    
+    <script type="module">
+        import { RayCaster, Renderer } from './js/engine.js';
+        import { LightSource, Crystal } from './js/entities.js';
+        import { EntityManager } from './js/entityManager.js';
+        
+        const canvas = document.getElementById('test-canvas');
+        const renderer = new Renderer(canvas);
+        const rayCaster = new RayCaster();
+        const entityManager = new EntityManager();
+        
+        // Create a light source
+        const light = new LightSource(2, 3, 0); // Pointing right
+        entityManager.add(light);
+        
+        // Create three crystals in a line
+        const crystal1 = new Crystal(8, 3);
+        const crystal2 = new Crystal(12, 3);
+        const crystal3 = new Crystal(16, 3);
+        
+        entityManager.add(crystal1);
+        entityManager.add(crystal2);
+        entityManager.add(crystal3);
+        
+        function render() {
+            // Reset crystals
+            entityManager.crystals.forEach(c => c.isActive = false);
+            
+            // Cast rays
+            const rays = rayCaster.cast(light, entityManager.getAllEntities());
+            
+            // Render
+            renderer.clear();
+            renderer.drawGrid(40);
+            
+            // Draw entities
+            entityManager.getAllEntities().forEach(entity => {
+                renderer.drawEntity(entity);
+            });
+            
+            // Draw rays
+            renderer.drawRays(rays);
+            
+            // Update UI
+            document.getElementById('crystal-1').classList.toggle('active', crystal1.isActive);
+            document.getElementById('crystal-2').classList.toggle('active', crystal2.isActive);
+            document.getElementById('crystal-3').classList.toggle('active', crystal3.isActive);
+            
+            requestAnimationFrame(render);
+        }
+        
+        render();
+    </script>
+</body>
+</html>

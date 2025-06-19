@@ -224,7 +224,8 @@ export class Crystal extends Entity {
     if (dist < 15) {
       return {
         point: new Vector2(this.x, this.y),
-        normal: new Vector2(0, 0)
+        normal: new Vector2(0, 0),
+        passThrough: true  // Add flag to indicate ray should continue
       };
     }
     

@@ -95,7 +95,7 @@ export class RayCaster {
           const dist = new Vector2(hit.point.x - currentPos.x, hit.point.y - currentPos.y).length();
           if (dist < closestDist && dist < this.stepSize * 2) {
             closestDist = dist;
-            closestHit = { ...hit, entity, type: entity.type };
+            closestHit = { ...hit, entity, type: entity.type, passThrough: hit.passThrough };
           }
         }
       }
@@ -113,7 +113,14 @@ export class RayCaster {
           this.traceRay(newRay, entities);
         } else if (closestHit.type === 'crystal') {
           closestHit.entity.activate();
-          // Ray continues through crystal
+          // If crystal has passThrough flag, ray continues
+          if (!closestHit.passThrough) {
+            ray.active = false;
+          } else {
+            // Continue ray from just past the crystal
+            currentPos = closestHit.point.add(ray.direction.multiply(this.stepSize * 2));
+            continue;
+          }
         }
         
         if (!ray.active) break;
