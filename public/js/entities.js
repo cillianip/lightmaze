@@ -17,6 +17,10 @@ export class Entity {
   checkRayIntersection(pos, dir) {
     return null;
   }
+  
+  getCenter() {
+    return { x: this.x, y: this.y };
+  }
 }
 
 export class LightSource extends Entity {
