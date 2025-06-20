@@ -40,7 +40,9 @@ export class LevelManager {
   
   async loadLevel(filename, id, world) {
     try {
-      const response = await fetch(`/levels/${filename}`);
+      // Use relative path for GitHub Pages compatibility
+      const basePath = window.location.pathname.includes('/lightmaze/') ? '/lightmaze' : '';
+      const response = await fetch(`${basePath}/levels/${filename}`);
       if (!response.ok) throw new Error('Level not found');
       
       const levelData = await response.json();
