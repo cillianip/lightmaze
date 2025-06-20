@@ -7,7 +7,7 @@
   "lightSource": {
     "x": 2,
     "y": 2,
-    "angle": 0.785398
+    "angle": 0
   },
   "walls": [
     { "x": 0, "y": 0, "width": 20, "height": 1 },

@@ -67,15 +67,24 @@ const LightMaze = {
       this.ui.updateLevelInfo(level);
       this.levelSelector.hide();
       this.settings.setLastPlayedLevel(levelId);
+    } else {
+      console.error(`Level ${levelId} not found`);
     }
   },
   
   setupEventListeners() {
     // Reset button
-    document.getElementById('reset-btn').addEventListener('click', () => {
-      this.game.resetLevel();
-      this.ui.updateMoveCounter(0);
-    });
+    const resetBtn = document.getElementById('reset-btn');
+    if (resetBtn) {
+      resetBtn.addEventListener('click', () => {
+        if (this.game) {
+          this.game.resetLevel();
+          // Don't update move counter here - resetLevel already does it
+        } else {
+          console.error('Game not initialized');
+        }
+      });
+    }
     
     // Undo button
     document.getElementById('undo-btn').addEventListener('click', () => {

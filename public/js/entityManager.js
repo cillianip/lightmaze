@@ -148,7 +148,8 @@ export class EntityManager {
   }
   
   checkWinCondition() {
-    return this.crystals.every(crystal => crystal.isActive);
+    // Only return true if there are crystals AND all are active
+    return this.crystals.length > 0 && this.crystals.every(crystal => crystal.isActive);
   }
   
   resetCrystals() {

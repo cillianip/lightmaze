@@ -79,10 +79,20 @@ export class RayCaster {
     if (ray.depth >= this.maxDepth) return;
     
     this.rays.push(ray);
-    let currentPos = ray.origin.add(ray.direction.multiply(this.stepSize));
+    let currentPos = ray.origin;
     let maxSteps = 1000; // Prevent infinite loops
     
     while (ray.active && maxSteps-- > 0) {
+      // Move ray forward
+      currentPos = currentPos.add(ray.direction.multiply(this.stepSize));
+      
+      // Check if out of bounds
+      if (this.isOutOfBounds(currentPos)) {
+        ray.points.push(currentPos);
+        ray.active = false;
+        break;
+      }
+      
       // Check all entities for intersection
       let closestHit = null;
       let closestDist = Infinity;
@@ -95,7 +105,7 @@ export class RayCaster {
           const dist = new Vector2(hit.point.x - currentPos.x, hit.point.y - currentPos.y).length();
           if (dist < closestDist && dist < this.stepSize * 2) {
             closestDist = dist;
-            closestHit = { ...hit, entity, type: entity.type, passThrough: hit.passThrough };
+            closestHit = { ...hit, entity, type: entity.type };
           }
         }
       }
@@ -113,25 +123,13 @@ export class RayCaster {
           this.traceRay(newRay, entities);
         } else if (closestHit.type === 'crystal') {
           closestHit.entity.activate();
-          // If crystal has passThrough flag, ray continues
-          if (!closestHit.passThrough) {
-            ray.active = false;
-          } else {
-            // Continue ray from just past the crystal
-            currentPos = closestHit.point.add(ray.direction.multiply(this.stepSize * 2));
-            continue;
-          }
+          // Crystals don't stop the ray - it passes through
+          // Move past the crystal to avoid re-detection
+          currentPos = closestHit.point.add(ray.direction.multiply(20)); // Move 20 pixels past crystal
+          // Add an intermediate point to show the ray continuing
+          ray.points.push(currentPos);
+          // Continue tracing
         }
-        
-        if (!ray.active) break;
-      }
-      
-      currentPos = currentPos.add(ray.direction.multiply(this.stepSize));
-      
-      if (this.isOutOfBounds(currentPos)) {
-        ray.points.push(currentPos);
-        ray.active = false;
-        break;
       }
     }
   }

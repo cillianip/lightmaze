@@ -61,7 +61,10 @@ export class LevelSelector {
       // Create level content
       const levelNumber = document.createElement('div');
       levelNumber.className = 'level-number';
-      levelNumber.textContent = level.id;
+      // Calculate level number within the world
+      const worldOffsets = { 1: 0, 2: 5, 3: 14 };
+      const levelInWorld = level.id - worldOffsets[level.world];
+      levelNumber.textContent = levelInWorld;
       
       const levelName = document.createElement('div');
       levelName.className = 'level-name';

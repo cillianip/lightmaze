@@ -342,45 +342,178 @@ export class AudioManager {
   }
   
   createMelodyLoop() {
-    const pentatonic = [261.63, 293.66, 329.63, 392, 440]; // C pentatonic
-    let noteIndex = 0;
+    // Simple pentatonic scale for peaceful sound
+    const scale = [261.63, 293.66, 329.63, 392, 440, 523.25, 587.33, 659.25]; // C pentatonic extended
+    
+    // Wave patterns - high to low sequences
+    const wavePatterns = [
+      [7, 6, 5, 4, 3, 2, 1, 0], // Full descending wave
+      [5, 4, 3, 2, 3, 4, 3, 2], // Gentle wave down
+      [4, 5, 4, 3, 2, 1, 2, 3], // Rolling wave
+      [6, 5, 4, 5, 4, 3, 2, 1], // Stepped descent
+      [3, 4, 3, 2, 1, 0, 1, 2], // Valley pattern
+      [4, 3, 2, 3, 4, 3, 2, 1]  // Gentle undulation
+    ];
+    
+    let currentWaveIndex = 0;
+    let noteInWave = 0;
+    let waveRepeat = 0;
+    
+    // Peaceful rhythm patterns - no jarring timings
+    const rhythmPatterns = [
+      [800, 800, 800, 800, 1600, 800, 800, 1600], // Steady with breath
+      [1000, 1000, 1000, 1000, 2000], // Simple and calm
+      [1200, 600, 600, 1200, 1200, 1200], // Gentle sway
+      [900, 900, 900, 900, 900, 900, 1800], // Meditative
+      [750, 750, 1500, 750, 750, 1500] // Peaceful pulse
+    ];
+    let currentRhythm = 0;
+    let rhythmIndex = 0;
     
     const playNote = () => {
       if (!this.settings.isMusicEnabled() || this.musicOscillators.length === 0) return;
       
-      const freq = pentatonic[noteIndex] * (Math.random() > 0.5 ? 1 : 0.5);
-      noteIndex = (noteIndex + Math.floor(Math.random() * 3)) % pentatonic.length;
+      // Get current wave pattern
+      const currentWave = wavePatterns[currentWaveIndex];
+      const noteIndex = currentWave[noteInWave % currentWave.length];
       
-      const oscillator = this.context.createOscillator();
-      const gainNode = this.context.createGain();
-      const filter = this.context.createBiquadFilter();
+      // Always use the exact note from the pattern - no randomness
+      const freq = scale[noteIndex];
       
-      oscillator.connect(filter);
-      filter.connect(gainNode);
-      gainNode.connect(this.musicGain);
+      // Occasionally drop an octave for depth
+      const octaveMultiplier = (noteIndex < 2 && noteInWave % 4 === 0) ? 0.5 : 1;
       
-      oscillator.type = 'sine';
-      oscillator.frequency.value = freq;
+      // Create multiple oscillators for richer sound
+      const oscillators = ['sine', 'triangle'].map((waveType, i) => {
+        const oscillator = this.context.createOscillator();
+        const gainNode = this.context.createGain();
+        const filter = this.context.createBiquadFilter();
+        const panner = this.context.createStereoPanner();
+        
+        oscillator.connect(filter);
+        filter.connect(gainNode);
+        gainNode.connect(panner);
+        panner.connect(this.musicGain);
+        
+        oscillator.type = waveType;
+        oscillator.frequency.value = freq * octaveMultiplier * (1 + i * 0.005); // Very slight detune
+        
+        filter.type = 'lowpass';
+        filter.frequency.value = 600 + (noteIndex * 50); // Filter follows pitch
+        filter.Q.value = 2;
+        
+        // Subtle stereo movement based on pitch
+        panner.pan.value = (noteIndex - 4) * 0.1; // High notes right, low notes left
+        
+        const attackTime = 0.3;
+        const releaseTime = 2.0;
+        const volume = waveType === 'sine' ? 0.03 : 0.015;
+        
+        gainNode.gain.setValueAtTime(0, this.context.currentTime);
+        gainNode.gain.linearRampToValueAtTime(volume, this.context.currentTime + attackTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, this.context.currentTime + releaseTime);
+        
+        oscillator.start(this.context.currentTime);
+        oscillator.stop(this.context.currentTime + releaseTime);
+        
+        return oscillator;
+      });
       
-      filter.type = 'lowpass';
-      filter.frequency.value = 1000;
-      filter.Q.value = 5;
+      noteInWave++;
       
-      const attackTime = 0.1;
-      const releaseTime = 2;
+      // Complete one wave pattern
+      if (noteInWave >= currentWave.length) {
+        noteInWave = 0;
+        waveRepeat++;
+        
+        // Change wave pattern every 2-3 repetitions
+        if (waveRepeat >= 2) {
+          waveRepeat = 0;
+          currentWaveIndex = (currentWaveIndex + 1) % wavePatterns.length;
+          
+          // Change rhythm with new wave pattern
+          currentRhythm = (currentRhythm + 1) % rhythmPatterns.length;
+          rhythmIndex = 0;
+        }
+      }
       
-      gainNode.gain.setValueAtTime(0, this.context.currentTime);
-      gainNode.gain.linearRampToValueAtTime(0.05, this.context.currentTime + attackTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.001, this.context.currentTime + releaseTime);
-      
-      oscillator.start(this.context.currentTime);
-      oscillator.stop(this.context.currentTime + releaseTime);
+      // Get next timing from rhythm pattern - no random variation
+      const rhythm = rhythmPatterns[currentRhythm];
+      const nextTime = rhythm[rhythmIndex % rhythm.length];
+      rhythmIndex++;
       
       // Schedule next note
-      setTimeout(playNote, 2000 + Math.random() * 3000);
+      setTimeout(playNote, nextTime);
     };
     
-    // Start the melody loop
-    setTimeout(playNote, 1000);
+    // Add gentle bass line that follows the waves
+    let bassIndex = 0;
+    
+    const playBass = () => {
+      if (!this.settings.isMusicEnabled()) return;
+      
+      // Simple bass notes - C and G only for stability
+      const bassNotes = [65.41, 98.11]; // C2 and G2
+      const bassNote = bassNotes[bassIndex % 2];
+      
+      // Create two oscillators for fatter bass
+      ['sine', 'triangle'].forEach((waveType, i) => {
+        const oscillator = this.context.createOscillator();
+        const gainNode = this.context.createGain();
+        const filter = this.context.createBiquadFilter();
+        
+        oscillator.connect(filter);
+        filter.connect(gainNode);
+        gainNode.connect(this.musicGain);
+        
+        oscillator.type = waveType;
+        oscillator.frequency.value = bassNote * (1 + i * 0.002); // Very subtle detune
+        
+        filter.type = 'lowpass';
+        filter.frequency.value = 150;
+        filter.Q.value = 1;
+        
+        const attackTime = 0.5;
+        const releaseTime = 3.0;
+        const volume = waveType === 'sine' ? 0.06 : 0.03;
+        
+        gainNode.gain.setValueAtTime(0, this.context.currentTime);
+        gainNode.gain.linearRampToValueAtTime(volume, this.context.currentTime + attackTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, this.context.currentTime + releaseTime);
+        
+        oscillator.start(this.context.currentTime);
+        oscillator.stop(this.context.currentTime + releaseTime);
+      });
+      
+      bassIndex++;
+      
+      // Simple alternating pattern - every 4 beats
+      const nextTime = 3200;
+      
+      // Schedule next bass note
+      setTimeout(playBass, nextTime);
+    };
+    
+    // Start the loops with tighter timing
+    setTimeout(playNote, 500);
+    setTimeout(playBass, 1000);
+  }
+  
+  setVolume(volume) {
+    if (this.masterGain) {
+      this.masterGain.gain.value = Math.max(0, Math.min(1, volume));
+    }
+  }
+  
+  setMusicVolume(volume) {
+    if (this.musicGain) {
+      this.musicGain.gain.value = Math.max(0, Math.min(1, volume));
+    }
+  }
+  
+  setSfxVolume(volume) {
+    if (this.sfxGain) {
+      this.sfxGain.gain.value = Math.max(0, Math.min(1, volume));
+    }
   }
 }

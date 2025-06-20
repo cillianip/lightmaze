@@ -5,7 +5,7 @@
   "difficulty": "advanced",
   "parMoves": 14,
   "lightSource": {
-    "x": 10,
+    "x": 1,
     "y": 7,
     "angle": 0
   },
@@ -14,10 +14,10 @@
     { "x": 0, "y": 14, "width": 20, "height": 1 },
     { "x": 0, "y": 0, "width": 1, "height": 15 },
     { "x": 19, "y": 0, "width": 1, "height": 15 },
-    { "x": 9, "y": 1, "width": 1, "height": 6 },
-    { "x": 11, "y": 1, "width": 1, "height": 6 },
-    { "x": 9, "y": 8, "width": 1, "height": 6 },
-    { "x": 11, "y": 8, "width": 1, "height": 6 }
+    { "x": 9, "y": 1, "width": 1, "height": 5 },
+    { "x": 11, "y": 1, "width": 1, "height": 5 },
+    { "x": 9, "y": 9, "width": 1, "height": 5 },
+    { "x": 11, "y": 9, "width": 1, "height": 5 }
   ],
   "crystals": [
     { "x": 2, "y": 2 },
@@ -32,6 +32,8 @@
     { "x": 15, "y": 4, "angle": 0.785398 },
     { "x": 5, "y": 4, "angle": -0.785398 },
     { "x": 15, "y": 10, "angle": -0.785398 },
-    { "x": 5, "y": 10, "angle": 0.785398 }
+    { "x": 5, "y": 10, "angle": 0.785398 },
+    { "x": 3, "y": 7, "angle": 0 },
+    { "x": 17, "y": 7, "angle": 0 }
   ]
 }

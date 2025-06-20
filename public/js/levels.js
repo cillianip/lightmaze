@@ -54,8 +54,19 @@ export class LevelManager {
   }
   
   generatePlaceholderLevel(id, world) {
-    const difficulty = Math.floor((id - 1) / 9);
-    const levelInWorld = ((id - 1) % 9) + 1;
+    // Calculate which level within the world this is
+    const worldLevels = {
+      1: 5,   // Tutorial world
+      2: 9,   // Intermediate world  
+      3: 11   // Advanced world
+    };
+    
+    let levelInWorld = id;
+    for (let w = 1; w < world; w++) {
+      levelInWorld -= worldLevels[w];
+    }
+    
+    const difficulty = world - 1;
     
     return {
       id,
@@ -139,11 +150,15 @@ export class LevelManager {
   }
   
   getLevelById(id) {
-    return this.levels.find(level => level.id === id);
+    // Convert to number to ensure consistent comparison
+    const numId = typeof id === 'string' ? parseInt(id, 10) : id;
+    return this.levels.find(level => level.id === numId);
   }
   
   setCurrentLevel(id) {
-    const index = this.levels.findIndex(level => level.id === id);
+    // Convert to number to ensure consistent comparison
+    const numId = typeof id === 'string' ? parseInt(id, 10) : id;
+    const index = this.levels.findIndex(level => level.id === numId);
     if (index !== -1) {
       this.currentLevelIndex = index;
     }

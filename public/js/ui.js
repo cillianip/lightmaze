@@ -56,6 +56,36 @@ export class UI {
       this.settings.setHighContrast(e.target.checked);
       document.body.classList.toggle('high-contrast', e.target.checked);
     });
+    
+    // Volume controls
+    const musicVolumeSlider = document.getElementById('music-volume');
+    const musicVolumeValue = document.getElementById('music-volume-value');
+    const sfxVolumeSlider = document.getElementById('sfx-volume');
+    const sfxVolumeValue = document.getElementById('sfx-volume-value');
+    
+    if (musicVolumeSlider) {
+      musicVolumeSlider.addEventListener('input', (e) => {
+        const volume = parseInt(e.target.value);
+        musicVolumeValue.textContent = volume + '%';
+        
+        if (window.LightMaze && window.LightMaze.audioManager) {
+          window.LightMaze.audioManager.setMusicVolume(volume / 100);
+        }
+        this.settings.setMusicVolume(volume / 100);
+      });
+    }
+    
+    if (sfxVolumeSlider) {
+      sfxVolumeSlider.addEventListener('input', (e) => {
+        const volume = parseInt(e.target.value);
+        sfxVolumeValue.textContent = volume + '%';
+        
+        if (window.LightMaze && window.LightMaze.audioManager) {
+          window.LightMaze.audioManager.setSfxVolume(volume / 100);
+        }
+        this.settings.setSfxVolume(volume / 100);
+      });
+    }
   }
   
   startTimer() {
@@ -67,17 +97,23 @@ export class UI {
   }
   
   updateMoveCounter(moves) {
-    this.elements.moveCounter.textContent = moves;
-    this.elements.moveCounter.classList.toggle('highlight', moves > 0);
+    if (this.elements.moveCounter) {
+      this.elements.moveCounter.textContent = moves;
+      this.elements.moveCounter.classList.toggle('highlight', moves > 0);
+    }
   }
   
   updateTimer(seconds) {
-    const minutes = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    this.elements.timer.textContent = `${minutes}:${secs.toString().padStart(2, '0')}`;
+    if (this.elements.timer) {
+      const minutes = Math.floor(seconds / 60);
+      const secs = seconds % 60;
+      this.elements.timer.textContent = `${minutes}:${secs.toString().padStart(2, '0')}`;
+    }
   }
   
   updateCrystalStatus(crystals) {
+    if (!this.elements.crystalIndicators) return;
+    
     this.elements.crystalIndicators.innerHTML = '';
     
     crystals.forEach((crystal, index) => {
@@ -89,17 +125,30 @@ export class UI {
   }
   
   updateLevelInfo(levelData) {
-    this.elements.levelName.textContent = levelData.name || `Level ${levelData.id}`;
-    this.elements.worldIndicator.textContent = `World ${levelData.world || 1}`;
-    this.elements.parMoves.textContent = levelData.parMoves || '-';
+    if (!levelData) {
+      console.error('[UI] No level data provided to updateLevelInfo');
+      return;
+    }
+    
+    if (this.elements.levelName) {
+      this.elements.levelName.textContent = levelData.name || `Level ${levelData.id}`;
+    }
+    if (this.elements.worldIndicator) {
+      this.elements.worldIndicator.textContent = `World ${levelData.world || 1}`;
+    }
+    if (this.elements.parMoves) {
+      this.elements.parMoves.textContent = levelData.parMoves || '-';
+    }
     
     const bestTime = this.settings.getBestTime(levelData.id);
-    if (bestTime) {
-      const minutes = Math.floor(bestTime / 60);
-      const seconds = bestTime % 60;
-      this.elements.bestTime.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
-    } else {
-      this.elements.bestTime.textContent = '-';
+    if (this.elements.bestTime) {
+      if (bestTime) {
+        const minutes = Math.floor(bestTime / 60);
+        const seconds = bestTime % 60;
+        this.elements.bestTime.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+      } else {
+        this.elements.bestTime.textContent = '-';
+      }
     }
   }
   

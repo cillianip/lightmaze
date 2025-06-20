@@ -8,6 +8,8 @@ export class Settings {
       colorblindMode: false,
       highContrast: false,
       volume: 1.0,
+      musicVolume: 0.4,
+      sfxVolume: 0.6,
       lastPlayedLevel: 1
     };
     
@@ -54,11 +56,25 @@ export class Settings {
     const musicToggle = document.getElementById('music-toggle');
     const colorblindToggle = document.getElementById('colorblind-toggle');
     const highContrastToggle = document.getElementById('high-contrast-toggle');
+    const musicVolumeSlider = document.getElementById('music-volume');
+    const musicVolumeValue = document.getElementById('music-volume-value');
+    const sfxVolumeSlider = document.getElementById('sfx-volume');
+    const sfxVolumeValue = document.getElementById('sfx-volume-value');
     
     if (soundToggle) soundToggle.checked = this.settings.soundEnabled;
     if (musicToggle) musicToggle.checked = this.settings.musicEnabled;
     if (colorblindToggle) colorblindToggle.checked = this.settings.colorblindMode;
     if (highContrastToggle) highContrastToggle.checked = this.settings.highContrast;
+    
+    if (musicVolumeSlider) {
+      musicVolumeSlider.value = this.settings.musicVolume * 100;
+      if (musicVolumeValue) musicVolumeValue.textContent = Math.round(this.settings.musicVolume * 100) + '%';
+    }
+    
+    if (sfxVolumeSlider) {
+      sfxVolumeSlider.value = this.settings.sfxVolume * 100;
+      if (sfxVolumeValue) sfxVolumeValue.textContent = Math.round(this.settings.sfxVolume * 100) + '%';
+    }
   }
   
   setSoundEnabled(enabled) {
@@ -86,6 +102,16 @@ export class Settings {
     this.saveSettings();
   }
   
+  setMusicVolume(volume) {
+    this.settings.musicVolume = Math.max(0, Math.min(1, volume));
+    this.saveSettings();
+  }
+  
+  setSfxVolume(volume) {
+    this.settings.sfxVolume = Math.max(0, Math.min(1, volume));
+    this.saveSettings();
+  }
+  
   isSoundEnabled() {
     return this.settings.soundEnabled;
   }
@@ -104,6 +130,14 @@ export class Settings {
   
   getVolume() {
     return this.settings.volume;
+  }
+  
+  getMusicVolume() {
+    return this.settings.musicVolume;
+  }
+  
+  getSfxVolume() {
+    return this.settings.sfxVolume;
   }
   
   getBestTime(levelId) {
