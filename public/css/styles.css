@@ -622,3 +622,68 @@ body.high-contrast {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Party Mode Styles */
+body.party-mode {
+  animation: party-pulse 2s ease-in-out infinite;
+}
+
+@keyframes party-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+}
+
+body.party-mode #game-header {
+  animation: rainbow-border 3s linear infinite;
+  border-image: linear-gradient(45deg, #ff0000, #ff7700, #ffdd00, #00ff00, #0099ff, #6633ff) 1;
+}
+
+@keyframes rainbow-border {
+  0% { filter: hue-rotate(0deg); }
+  100% { filter: hue-rotate(360deg); }
+}
+
+body.party-mode .game-btn:hover {
+  animation: party-bounce 0.5s ease infinite;
+  background: linear-gradient(45deg, #ff0000, #ff7700, #ffdd00, #00ff00, #0099ff, #6633ff);
+  background-size: 200% 200%;
+  animation: party-gradient 2s ease infinite, party-bounce 0.5s ease infinite;
+}
+
+@keyframes party-bounce {
+  0%, 100% { transform: translateY(-1px) scale(1.05); }
+  50% { transform: translateY(-3px) scale(1.1); }
+}
+
+@keyframes party-gradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+body.party-mode .crystal-indicator.active {
+  animation: party-crystal 0.5s ease infinite;
+}
+
+@keyframes party-crystal {
+  0%, 100% { 
+    transform: scale(1) rotate(45deg);
+    filter: hue-rotate(0deg);
+  }
+  25% { 
+    transform: scale(1.2) rotate(90deg);
+    filter: hue-rotate(90deg);
+  }
+  50% { 
+    transform: scale(1) rotate(135deg);
+    filter: hue-rotate(180deg);
+  }
+  75% { 
+    transform: scale(1.2) rotate(180deg);
+    filter: hue-rotate(270deg);
+  }
+}
+
+body.party-mode #game-canvas {
+  box-shadow: 0 0 30px rgba(255, 0, 255, 0.5), 0 0 60px rgba(0, 255, 255, 0.3);
+}

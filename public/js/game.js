@@ -355,7 +355,13 @@ export class Game {
     
     if (allCrystalsActive && !this.isComplete) {
       this.isComplete = true;
-      this.audioManager.play('levelComplete');
+      
+      // Play party victory sound if party mode is enabled
+      if (window.LightMaze && window.LightMaze.partyMode && window.LightMaze.partyMode.enabled) {
+        window.LightMaze.partyMode.playPartySound('victory');
+      } else {
+        this.audioManager.play('levelComplete');
+      }
       
       // Create victory particle effect
       this.particleSystem.createVictoryEffect(this.canvas.width, this.canvas.height);
@@ -445,12 +451,23 @@ export class Game {
         // Crystal just activated!
         const pos = crystal.getCenter();
         this.particleSystem.createCrystalActivation(pos.x, pos.y);
-        this.audioManager.play('crystal');
+        
+        // Play party sound if party mode is enabled
+        if (window.LightMaze && window.LightMaze.partyMode && window.LightMaze.partyMode.enabled) {
+          window.LightMaze.partyMode.playPartySound('crystal');
+        } else {
+          this.audioManager.play('crystal');
+        }
       }
     });
     
     // Update particle system
     this.particleSystem.update(deltaTime);
+    
+    // Update party mode if enabled
+    if (window.LightMaze && window.LightMaze.partyMode) {
+      window.LightMaze.partyMode.update(deltaTime);
+    }
     
     // Update UI (including timer)
     this.updateUI();
@@ -472,6 +489,11 @@ export class Game {
     
     // Render particles on top
     this.particleSystem.render(this.renderer.ctx);
+    
+    // Render party mode effects on top
+    if (window.LightMaze && window.LightMaze.partyMode) {
+      window.LightMaze.partyMode.render(this.renderer.ctx);
+    }
   }
   
   pause() {

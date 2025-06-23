@@ -176,11 +176,26 @@ export class Renderer {
     rays.forEach(ray => {
       if (ray.points.length < 2) return;
       
+      // Check if party mode is enabled
+      const isPartyMode = window.LightMaze && window.LightMaze.partyMode && window.LightMaze.partyMode.enabled;
+      let beamColor = '#00ffff';
+      let beamColorRgba = 'rgba(0, 255, 255,';
+      
+      if (isPartyMode) {
+        // Get rainbow color from party mode
+        beamColor = window.LightMaze.partyMode.getRainbowColor();
+        // Convert RGB to RGBA format for transparency
+        const rgbMatch = beamColor.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
+        if (rgbMatch) {
+          beamColorRgba = `rgba(${rgbMatch[1]}, ${rgbMatch[2]}, ${rgbMatch[3]},`;
+        }
+      }
+      
       // Draw multiple layers for smooth glow effect
       const layers = [
-        { width: 8, color: 'rgba(0, 255, 255, 0.2)', blur: 20 },
-        { width: 5, color: 'rgba(0, 255, 255, 0.4)', blur: 15 },
-        { width: 3, color: '#00ffff', blur: 10 },
+        { width: 8, color: beamColorRgba + ' 0.2)', blur: 20 },
+        { width: 5, color: beamColorRgba + ' 0.4)', blur: 15 },
+        { width: 3, color: beamColor, blur: 10 },
         { width: 1, color: 'rgba(255, 255, 255, 0.8)', blur: 0 }
       ];
       
@@ -188,7 +203,7 @@ export class Renderer {
         this.ctx.save();
         this.ctx.strokeStyle = layer.color;
         this.ctx.lineWidth = layer.width;
-        this.ctx.shadowColor = '#00ffff';
+        this.ctx.shadowColor = beamColor;
         this.ctx.shadowBlur = layer.blur;
         this.ctx.lineCap = 'round';
         this.ctx.lineJoin = 'round';
@@ -208,8 +223,8 @@ export class Renderer {
       ray.points.forEach((point, i) => {
         if (i > 0 && i < ray.points.length - 1) {
           this.ctx.save();
-          this.ctx.fillStyle = '#00ffff';
-          this.ctx.shadowColor = '#00ffff';
+          this.ctx.fillStyle = beamColor;
+          this.ctx.shadowColor = beamColor;
           this.ctx.shadowBlur = 15;
           this.ctx.beginPath();
           this.ctx.arc(point.x, point.y, 3, 0, Math.PI * 2);

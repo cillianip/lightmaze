@@ -6,6 +6,7 @@ import { LevelManager } from './levels.js';
 import { AudioManager } from './audio.js';
 import { Settings } from './settings.js';
 import { LevelSelector } from './levelSelector.js';
+import { PartyMode } from './partyMode.js';
 
 const LightMaze = {
   game: null,
@@ -14,6 +15,7 @@ const LightMaze = {
   audioManager: null,
   settings: null,
   levelSelector: null,
+  partyMode: null,
   
   async init() {
     try {
@@ -34,6 +36,14 @@ const LightMaze = {
       this.levelSelector = new LevelSelector(this.levelManager, (levelId) => {
         this.loadLevel(levelId);
       });
+      
+      // Initialize party mode
+      this.partyMode = new PartyMode(this.game, this.audioManager);
+      
+      // Enable party mode if it was previously enabled
+      if (this.settings.isPartyMode()) {
+        this.partyMode.setEnabled(true);
+      }
       
       // Setup event listeners
       this.setupEventListeners();

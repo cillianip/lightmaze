@@ -126,38 +126,52 @@ export class ParticleSystem {
   }
   
   createBeamTrail(x, y, direction) {
+    const isPartyMode = window.LightMaze && window.LightMaze.partyMode && window.LightMaze.partyMode.enabled;
     const velocity = direction.multiply(-20).add(
       new Vector2((Math.random() - 0.5) * 10, (Math.random() - 0.5) * 10)
     );
+    
+    let color = '#00ffff';
+    if (isPartyMode) {
+      const colors = ['#ff0000', '#ff7700', '#ffdd00', '#00ff00', '#0099ff', '#0000ff', '#6633ff', '#ff00ff'];
+      color = colors[Math.floor(Math.random() * colors.length)];
+    }
     
     const particle = new Particle(
       x + (Math.random() - 0.5) * 4,
       y + (Math.random() - 0.5) * 4,
       velocity,
-      '#00ffff',
-      1 + Math.random() * 2,
-      0.3
+      color,
+      isPartyMode ? 2 + Math.random() * 3 : 1 + Math.random() * 2,
+      isPartyMode ? 0.5 : 0.3
     );
     
     this.particles.push(particle);
   }
   
   createMirrorRotation(x, y) {
-    const particleCount = 8;
+    const isPartyMode = window.LightMaze && window.LightMaze.partyMode && window.LightMaze.partyMode.enabled;
+    const particleCount = isPartyMode ? 12 : 8;
     
     for (let i = 0; i < particleCount; i++) {
       const angle = (Math.PI * 2 * i) / particleCount;
-      const speed = 50;
+      const speed = isPartyMode ? 60 : 50;
       const velocity = new Vector2(
         Math.cos(angle) * speed,
         Math.sin(angle) * speed
       );
       
+      let color = '#ff00ff';
+      if (isPartyMode) {
+        const colors = ['#ff0000', '#ff7700', '#ffdd00', '#00ff00', '#0099ff', '#0000ff', '#6633ff', '#ff00ff'];
+        color = colors[i % colors.length];
+      }
+      
       const particle = new Particle(
         x, y, velocity,
-        '#ff00ff',
-        2,
-        0.4
+        color,
+        isPartyMode ? 3 : 2,
+        isPartyMode ? 0.6 : 0.4
       );
       
       this.particles.push(particle);

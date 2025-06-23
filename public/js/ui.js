@@ -57,6 +57,14 @@ export class UI {
       document.body.classList.toggle('high-contrast', e.target.checked);
     });
     
+    document.getElementById('party-mode-toggle').addEventListener('change', (e) => {
+      this.settings.setPartyMode(e.target.checked);
+      // Trigger party mode change event
+      if (window.LightMaze && window.LightMaze.partyMode) {
+        window.LightMaze.partyMode.setEnabled(e.target.checked);
+      }
+    });
+    
     // Volume controls
     const musicVolumeSlider = document.getElementById('music-volume');
     const musicVolumeValue = document.getElementById('music-volume-value');

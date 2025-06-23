@@ -7,6 +7,7 @@ export class Settings {
       musicEnabled: true,
       colorblindMode: false,
       highContrast: false,
+      partyMode: false,
       volume: 1.0,
       musicVolume: 0.4,
       sfxVolume: 0.6,
@@ -30,6 +31,10 @@ export class Settings {
           
           if (this.settings.highContrast) {
             document.body.classList.add('high-contrast');
+          }
+          
+          if (this.settings.partyMode) {
+            document.body.classList.add('party-mode');
           }
           
           this.updateUI();
@@ -56,6 +61,7 @@ export class Settings {
     const musicToggle = document.getElementById('music-toggle');
     const colorblindToggle = document.getElementById('colorblind-toggle');
     const highContrastToggle = document.getElementById('high-contrast-toggle');
+    const partyModeToggle = document.getElementById('party-mode-toggle');
     const musicVolumeSlider = document.getElementById('music-volume');
     const musicVolumeValue = document.getElementById('music-volume-value');
     const sfxVolumeSlider = document.getElementById('sfx-volume');
@@ -65,6 +71,7 @@ export class Settings {
     if (musicToggle) musicToggle.checked = this.settings.musicEnabled;
     if (colorblindToggle) colorblindToggle.checked = this.settings.colorblindMode;
     if (highContrastToggle) highContrastToggle.checked = this.settings.highContrast;
+    if (partyModeToggle) partyModeToggle.checked = this.settings.partyMode;
     
     if (musicVolumeSlider) {
       musicVolumeSlider.value = this.settings.musicVolume * 100;
@@ -109,6 +116,11 @@ export class Settings {
   
   setSfxVolume(volume) {
     this.settings.sfxVolume = Math.max(0, Math.min(1, volume));
+    this.saveSettings();
+  }
+  
+  setPartyMode(enabled) {
+    this.settings.partyMode = enabled;
     this.saveSettings();
   }
   
@@ -183,5 +195,9 @@ export class Settings {
   setLastPlayedLevel(levelId) {
     this.settings.lastPlayedLevel = levelId;
     this.saveSettings();
+  }
+  
+  isPartyMode() {
+    return this.settings.partyMode || false;
   }
 }
