@@ -126,7 +126,12 @@ export class EntityManager {
     return true;
   }
   
-  getMirrorAt(x, y, radius = 30) {
+  getMirrorAt(x, y, customRadius = null) {
+    // Larger touch target for mobile devices
+    const isTouchDevice = 'ontouchstart' in window;
+    const baseRadius = isTouchDevice ? 35 : 30;
+    const radius = customRadius || baseRadius;
+    
     for (const mirror of this.draggableMirrors) {
       const dist = Math.sqrt(
         Math.pow(x - mirror.x, 2) + 

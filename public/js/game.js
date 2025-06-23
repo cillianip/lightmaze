@@ -32,8 +32,19 @@ export class Game {
     this.hoveredMirror = null;
     this.lastTimestamp = null;
     
+    // Mobile touch handling
+    this.lastTapTime = 0;
+    this.lastTapX = 0;
+    this.lastTapY = 0;
+    this.tapTimeout = null;
+    
     this.setupInputHandlers();
     this.gameLoop = this.gameLoop.bind(this);
+    
+    // Handle initial sizing and window resize
+    this.handleResize();
+    window.addEventListener('resize', () => this.handleResize());
+    
     requestAnimationFrame(this.gameLoop);
   }
   
@@ -98,6 +109,21 @@ export class Game {
     }
     
     this.updateUI();
+    
+    // Show mobile hint on first level for touch devices
+    if ('ontouchstart' in window && levelData.id === 1) {
+      this.showMobileHint();
+    }
+  }
+  
+  showMobileHint() {
+    const hint = document.getElementById('mobile-hint');
+    if (hint) {
+      hint.classList.remove('hidden');
+      setTimeout(() => {
+        hint.classList.add('hidden');
+      }, 5000); // Hide after 5 seconds
+    }
   }
   
   setupInputHandlers() {
@@ -116,6 +142,39 @@ export class Game {
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
     
+    // Check for double tap
+    const now = Date.now();
+    const tapDelay = 300; // milliseconds
+    const tapDistance = 30; // pixels
+    
+    if (this.lastTapTime && 
+        (now - this.lastTapTime) < tapDelay &&
+        Math.abs(x - this.lastTapX) < tapDistance &&
+        Math.abs(y - this.lastTapY) < tapDistance) {
+      // Double tap detected
+      const mirror = this.entityManager.getMirrorAt(x, y);
+      if (mirror) {
+        this.saveState();
+        mirror.rotate();
+        this.moveCount++;
+        this.updateUI();
+        this.audioManager.play('rotate');
+        
+        // Create rotation particle effect
+        const pos = mirror.getCenter();
+        this.particleSystem.createMirrorRotation(pos.x, pos.y);
+        
+        // Reset tap tracking
+        this.lastTapTime = 0;
+        return;
+      }
+    }
+    
+    this.lastTapTime = now;
+    this.lastTapX = x;
+    this.lastTapY = y;
+    
+    // Normal drag handling
     const mirror = this.entityManager.getMirrorAt(x, y);
     if (mirror) {
       this.saveState();
@@ -411,11 +470,60 @@ export class Game {
   }
   
   handleResize() {
-    const rect = this.canvas.parentElement.getBoundingClientRect();
-    const maxWidth = Math.min(rect.width - 40, 800);
-    const maxHeight = Math.min(rect.height - 40, 600);
+    const container = this.canvas.parentElement;
+    const rect = container.getBoundingClientRect();
     
-    this.canvas.style.width = maxWidth + 'px';
-    this.canvas.style.height = maxHeight + 'px';
+    // Calculate available space
+    const padding = 20;
+    const availableWidth = rect.width - padding * 2;
+    const availableHeight = rect.height - padding * 2;
+    
+    // Maintain 4:3 aspect ratio
+    const targetRatio = 4 / 3;
+    let width, height;
+    
+    if (availableWidth / availableHeight > targetRatio) {
+      // Height constrained
+      height = availableHeight;
+      width = height * targetRatio;
+    } else {
+      // Width constrained
+      width = availableWidth;
+      height = width / targetRatio;
+    }
+    
+    // Apply max dimensions for desktop
+    const maxWidth = 800;
+    const maxHeight = 600;
+    
+    if (width > maxWidth) {
+      width = maxWidth;
+      height = width / targetRatio;
+    }
+    
+    if (height > maxHeight) {
+      height = maxHeight;
+      width = height * targetRatio;
+    }
+    
+    // Update canvas display size
+    this.canvas.style.width = Math.floor(width) + 'px';
+    this.canvas.style.height = Math.floor(height) + 'px';
+    
+    // Calculate scale factor for rendering
+    this.scale = width / this.canvas.width;
+    
+    // For touch devices, ensure minimum grid size
+    const isTouchDevice = 'ontouchstart' in window;
+    if (isTouchDevice) {
+      const minGridSize = 40; // minimum 40px per grid cell
+      const gridCells = 20; // 20x15 grid
+      const minWidth = gridCells * minGridSize;
+      
+      if (width < minWidth) {
+        // Add scroll or zoom capability for small screens
+        container.style.overflow = 'auto';
+      }
+    }
   }
 }

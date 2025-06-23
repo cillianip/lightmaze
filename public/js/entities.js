@@ -68,15 +68,28 @@ export class Mirror extends Entity {
     ctx.save();
     ctx.translate(this.x, this.y);
     
-    // Draw hover/drag indicator
+    // Draw hover/drag indicator with mobile enhancements
+    const isTouchDevice = 'ontouchstart' in window;
     if (this.isDragging || this.isHovered) {
-      ctx.fillStyle = this.isDragging ? 'rgba(255, 255, 0, 0.1)' : 'rgba(255, 255, 255, 0.05)';
-      ctx.strokeStyle = this.isDragging ? 'rgba(255, 255, 0, 0.5)' : 'rgba(255, 255, 255, 0.3)';
-      ctx.lineWidth = 2;
+      // Larger visual feedback on mobile
+      const indicatorSize = isTouchDevice ? 0.6 : 0.45;
+      ctx.fillStyle = this.isDragging ? 'rgba(255, 255, 0, 0.2)' : 'rgba(255, 255, 255, 0.1)';
+      ctx.strokeStyle = this.isDragging ? 'rgba(255, 255, 0, 0.8)' : 'rgba(255, 255, 255, 0.5)';
+      ctx.lineWidth = isTouchDevice ? 3 : 2;
       ctx.beginPath();
-      ctx.arc(0, 0, this.gridSize * 0.45, 0, Math.PI * 2);
+      ctx.arc(0, 0, this.gridSize * indicatorSize, 0, Math.PI * 2);
       ctx.fill();
       ctx.stroke();
+      
+      // Add rotation hint on touch devices when selected
+      if (isTouchDevice && this.isDragging) {
+        ctx.save();
+        ctx.font = '12px Arial';
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+        ctx.textAlign = 'center';
+        ctx.fillText('Double tap to rotate', 0, -this.gridSize * 0.7);
+        ctx.restore();
+      }
     }
     
     ctx.rotate(this.angle);
