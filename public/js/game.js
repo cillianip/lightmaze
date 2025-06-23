@@ -21,7 +21,8 @@ export class Game {
     this.performanceMonitor = new PerformanceMonitor();
     
     this.moveCount = 0;
-    this.startTime = Date.now();
+    this.globalStartTime = Date.now(); // Global timer for entire game session
+    this.levelStartTime = Date.now(); // Timer for current level
     this.isPaused = false;
     this.isComplete = false;
     
@@ -54,7 +55,7 @@ export class Game {
     this.particleSystem.clear();
     this.history = [];
     this.moveCount = 0;
-    this.startTime = Date.now();
+    this.levelStartTime = Date.now(); // Reset level timer, but not global timer
     this.isComplete = false;
     
     if (levelData.lightSource) {
@@ -270,7 +271,11 @@ export class Game {
   }
   
   getElapsedTime() {
-    return Math.floor((Date.now() - this.startTime) / 1000);
+    return Math.floor((Date.now() - this.globalStartTime) / 1000);
+  }
+  
+  getLevelElapsedTime() {
+    return Math.floor((Date.now() - this.levelStartTime) / 1000);
   }
   
   checkWinCondition() {
@@ -283,17 +288,20 @@ export class Game {
       // Create victory particle effect
       this.particleSystem.createVictoryEffect(this.canvas.width, this.canvas.height);
       
-      if (window.LightMaze && window.LightMaze.ui) {
-        window.LightMaze.ui.showVictory(this.moveCount, this.getElapsedTime());
-      }
-      
-      if (this.currentLevel && this.currentLevel.id) {
-        this.levelManager.completeLevel(
-          this.currentLevel.id,
-          this.moveCount,
-          this.getElapsedTime()
-        );
-      }
+      // Wait 1 second before showing the victory popup
+      setTimeout(() => {
+        if (window.LightMaze && window.LightMaze.ui) {
+          window.LightMaze.ui.showVictory(this.moveCount, this.getLevelElapsedTime());
+        }
+        
+        if (this.currentLevel && this.currentLevel.id) {
+          this.levelManager.completeLevel(
+            this.currentLevel.id,
+            this.moveCount,
+            this.getLevelElapsedTime()
+          );
+        }
+      }, 2000);
     }
   }
   
@@ -371,6 +379,9 @@ export class Game {
     
     // Update particle system
     this.particleSystem.update(deltaTime);
+    
+    // Update UI (including timer)
+    this.updateUI();
     
     this.checkWinCondition();
   }
