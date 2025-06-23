@@ -132,6 +132,10 @@ export class Game {
     this.canvas.addEventListener('pointerup', this.handlePointerUp.bind(this));
     this.canvas.addEventListener('contextmenu', this.handleContextMenu.bind(this));
     
+    // Prevent default touch behaviors
+    this.canvas.addEventListener('touchstart', (e) => e.preventDefault(), { passive: false });
+    this.canvas.addEventListener('touchmove', (e) => e.preventDefault(), { passive: false });
+    
     document.addEventListener('keydown', this.handleKeyDown.bind(this));
   }
   
@@ -139,8 +143,11 @@ export class Game {
     if (this.isPaused || this.isComplete) return;
     
     const rect = this.canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    // Scale coordinates from display size to canvas resolution
+    const scaleX = this.canvas.width / rect.width;
+    const scaleY = this.canvas.height / rect.height;
+    const x = (e.clientX - rect.left) * scaleX;
+    const y = (e.clientY - rect.top) * scaleY;
     
     // Check for double tap
     const now = Date.now();
@@ -187,8 +194,11 @@ export class Game {
     if (this.isPaused || this.isComplete) return;
     
     const rect = this.canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    // Scale coordinates from display size to canvas resolution
+    const scaleX = this.canvas.width / rect.width;
+    const scaleY = this.canvas.height / rect.height;
+    const x = (e.clientX - rect.left) * scaleX;
+    const y = (e.clientY - rect.top) * scaleY;
     
     if (this.draggedMirror && this.draggedMirror.isDragging) {
       const oldGridX = this.draggedMirror.gridX;
@@ -244,8 +254,11 @@ export class Game {
     if (this.isPaused || this.isComplete) return;
     
     const rect = this.canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    // Scale coordinates from display size to canvas resolution
+    const scaleX = this.canvas.width / rect.width;
+    const scaleY = this.canvas.height / rect.height;
+    const x = (e.clientX - rect.left) * scaleX;
+    const y = (e.clientY - rect.top) * scaleY;
     
     const mirror = this.entityManager.getMirrorAt(x, y);
     if (mirror) {

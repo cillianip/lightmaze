@@ -381,20 +381,54 @@ body {
   position: absolute;
   top: 1rem;
   right: 1rem;
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   background-color: var(--bg-tertiary);
-  border: 1px solid var(--border-color);
+  border: 2px solid var(--border-color);
   border-radius: 50%;
   color: var(--text-primary);
   font-size: 1.5rem;
+  line-height: 1;
   cursor: pointer;
   transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .close-btn:hover {
   background-color: var(--danger-color);
   transform: rotate(90deg);
+}
+
+/* Mobile hint styles */
+.mobile-hint {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.9);
+  color: white;
+  padding: 15px 25px;
+  border-radius: 25px;
+  font-size: 14px;
+  text-align: center;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  z-index: 1000;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+.mobile-hint p {
+  margin: 5px 0;
+  font-size: 16px;
+}
+
+.mobile-hint.hidden {
+  opacity: 0;
+  visibility: hidden;
 }
 
 .hidden {
@@ -510,29 +544,6 @@ body.high-contrast {
   #crystal-status {
     flex: 1;
     width: 100%;
-  }
-  
-  .mobile-hint {
-    position: absolute;
-    bottom: 10px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: rgba(0, 0, 0, 0.8);
-    color: white;
-    padding: 10px 20px;
-    border-radius: 20px;
-    font-size: 14px;
-    text-align: center;
-    pointer-events: none;
-    transition: opacity 0.3s ease;
-  }
-  
-  .mobile-hint p {
-    margin: 5px 0;
-  }
-  
-  .mobile-hint.hidden {
-    opacity: 0;
   }
   
   .modal-content {
