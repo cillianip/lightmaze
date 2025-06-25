@@ -42,6 +42,9 @@ export class LevelSelector {
     // Get levels for current world
     const levels = this.levelManager.levels.filter(level => level.world === this.currentWorld);
     
+    // Get the current level ID to highlight it
+    const currentLevelId = this.levelManager.getCurrentLevelId();
+    
     levels.forEach(level => {
       const isUnlocked = this.levelManager.isLevelUnlocked(level.id);
       const progress = this.getLevelProgress(level.id);
@@ -56,6 +59,11 @@ export class LevelSelector {
       
       if (progress.completed) {
         levelElement.classList.add('completed');
+      }
+      
+      // Highlight the current level
+      if (level.id === currentLevelId) {
+        levelElement.classList.add('current');
       }
       
       // Create level content
@@ -133,6 +141,19 @@ export class LevelSelector {
   }
   
   show() {
+    // Determine the current world based on the current level
+    const currentLevel = this.levelManager.getCurrentLevel();
+    if (currentLevel && currentLevel.world) {
+      this.switchWorld(currentLevel.world);
+    } else {
+      // If no current level, try to determine from last played level
+      const lastLevelId = this.levelManager.currentLevelIndex || 1;
+      const lastLevel = this.levelManager.getLevelById(lastLevelId);
+      if (lastLevel && lastLevel.world) {
+        this.switchWorld(lastLevel.world);
+      }
+    }
+    
     this.container.classList.remove('hidden');
     this.render(); // Refresh to show latest progress
   }

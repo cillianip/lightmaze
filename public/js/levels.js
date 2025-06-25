@@ -133,6 +133,11 @@ export class LevelManager {
     return this.levels[this.currentLevelIndex];
   }
   
+  getCurrentLevelId() {
+    const currentLevel = this.getCurrentLevel();
+    return currentLevel ? currentLevel.id : null;
+  }
+  
   getNextLevel() {
     if (this.currentLevelIndex < this.levels.length - 1) {
       this.currentLevelIndex++;

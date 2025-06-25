@@ -76,6 +76,7 @@ const LightMaze = {
       this.game.loadLevel(level);
       this.ui.updateLevelInfo(level);
       this.levelSelector.hide();
+      this.game.resume(); // Resume the game after loading a level
       this.settings.setLastPlayedLevel(levelId);
     } else {
       console.error(`Level ${levelId} not found`);

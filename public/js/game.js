@@ -32,6 +32,9 @@ export class Game {
     this.hoveredMirror = null;
     this.lastTimestamp = null;
     
+    // Track initial mirror state for move counting
+    this.dragStartState = null;
+    
     // Mobile touch handling
     this.lastTapTime = 0;
     this.lastTapX = 0;
@@ -161,6 +164,13 @@ export class Game {
       // Double tap detected
       const mirror = this.entityManager.getMirrorAt(x, y);
       if (mirror) {
+        // Cancel any ongoing drag to prevent issues
+        if (this.draggedMirror && this.draggedMirror.isDragging) {
+          this.draggedMirror.endDrag();
+          this.draggedMirror = null;
+          this.dragStartState = null;
+        }
+        
         this.saveState();
         mirror.rotate();
         this.moveCount++;
@@ -184,6 +194,12 @@ export class Game {
     // Normal drag handling
     const mirror = this.entityManager.getMirrorAt(x, y);
     if (mirror) {
+      // Store initial state before any changes
+      this.dragStartState = {
+        gridX: mirror.gridX,
+        gridY: mirror.gridY,
+        angle: mirror.angle
+      };
       this.saveState();
       mirror.startDrag(x, y);
       this.draggedMirror = mirror;
@@ -241,17 +257,33 @@ export class Game {
   handlePointerUp(e) {
     if (this.draggedMirror && this.draggedMirror.isDragging) {
       this.draggedMirror.endDrag();
-      this.moveCount++;
-      this.updateUI();
-      this.audioManager.play('move');
+      
+      // Only count as a move if position or angle changed
+      if (this.dragStartState && (
+        this.draggedMirror.gridX !== this.dragStartState.gridX ||
+        this.draggedMirror.gridY !== this.dragStartState.gridY ||
+        this.draggedMirror.angle !== this.dragStartState.angle
+      )) {
+        this.moveCount++;
+        this.updateUI();
+        this.audioManager.play('move');
+      }
     }
     this.draggedMirror = null;
+    this.dragStartState = null;
   }
   
   handleContextMenu(e) {
     e.preventDefault();
     
     if (this.isPaused || this.isComplete) return;
+    
+    // Cancel any ongoing drag operation to prevent double move counting
+    if (this.draggedMirror && this.draggedMirror.isDragging) {
+      this.draggedMirror.endDrag();
+      this.draggedMirror = null;
+      this.dragStartState = null;
+    }
     
     const rect = this.canvas.getBoundingClientRect();
     // Scale coordinates from display size to canvas resolution
